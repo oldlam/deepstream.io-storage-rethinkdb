@@ -1,5 +1,16 @@
 "use strict"
 
+function dateReviver(key, value) {
+  if (typeof value === 'string') {
+    var a;
+    a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
+    if (a) {
+      return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
+    }
+  }
+  return value;
+};
+
 /**
  * This method is for the storage connector, to allow queries to happen more naturally
  * do not use in cache connectors
@@ -14,7 +25,7 @@
  * @returns {Object} data
  */
 module.exports.transformValueForStorage = function ( value ) {
-  value = JSON.parse( JSON.stringify( value ) )
+  value = JSON.parse( JSON.stringify( value ), dateReviver )
 
   var data = value._d
   delete value._d
@@ -45,7 +56,7 @@ module.exports.transformValueForStorage = function ( value ) {
  * @returns {Object} data
  */
 module.exports.transformValueFromStorage = function( value ) {
-  value = JSON.parse( JSON.stringify( value ) )
+  value = JSON.parse( JSON.stringify( value ), dateReviver )
 
   var data = value.__ds
   delete value.__ds
